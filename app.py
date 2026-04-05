@@ -1,8 +1,15 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import os
-from carpark_service import fetch_carpark_data, parse_carpark_xml
+from datetime import datetime
 
-app = Flask(__name__)
+from carpark_service import (
+    fetch_carpark_data,
+    parse_carpark_xml,
+    calculate_distance_km,
+)
+from carpark_locations import get_carpark_location
+
+app = Flask(__name__, template_folder="templates")
 
 DSAT_API_URL = "https://dsat.apigateway.data.gov.mo/car_park_maintance"
 DSAT_API_CODE = os.getenv("DSAT_API_CODE")
@@ -11,6 +18,37 @@ DSAT_API_CODE = os.getenv("DSAT_API_CODE")
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/api/carparks")
+def api_carparks():
+    lat = request.args.get("lat", type=float)
+    lng = request.args.get("lng", type=float)
+
+    if lat is None or lng is None:
+        return jsonify({"error": "需要提供 lat 和 lng 參數"}), 400
+
+    try:
+        xml_data = fetch_carpark_data()
+        carparks = parse_carpark_xml(xml_data)
+    except Exception as e:
+        return jsonify({"error": f"數據獲取失敗: {str(e)}"}), 500
+
+    result = []
+    for cp in carparks:
+        loc = get_carpark_location(cp["name"])
+        if loc:
+            cp["distance_km"] = calculate_distance_km(lat, lng, loc["lat"], loc["lng"])
+            result.append(cp)
+
+    result.sort(key=lambda x: x["distance_km"])
+
+    return jsonify({
+        "updated_at": datetime.now().isoformat(),
+        "user_lat": lat,
+        "user_lng": lng,
+        "carparks": result,
+    })
 
 
 if __name__ == "__main__":
