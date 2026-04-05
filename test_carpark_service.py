@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
 from carpark_service import parse_carpark_xml, fetch_carpark_data, calculate_distance_km
+from carpark_locations import get_carpark_location
 
 
 def test_calculate_distance_same_point():
@@ -42,3 +43,18 @@ def test_fetch_carpark_data():
         result = fetch_carpark_data()
         mock_get.assert_called_once()
         assert result == '<?xml version="1.0" encoding="UTF-8"?><CarPark></CarPark>'
+
+
+def test_get_carpark_location_exact_match():
+    loc = get_carpark_location("栢力停車場")
+    assert loc == {"lat": 22.2025, "lng": 113.5430}
+
+
+def test_get_carpark_location_partial_match():
+    loc = get_carpark_location("栢佳")
+    assert loc is not None
+
+
+def test_get_carpark_location_not_found():
+    loc = get_carpark_location("不存在的停車場")
+    assert loc is None

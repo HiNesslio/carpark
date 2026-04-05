@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, render_template
 import os
+from carpark_service import fetch_carpark_data, parse_carpark_xml
 
-app = Flask(__name__, static_folder="static", static_url_path="")
+app = Flask(__name__)
 
 DSAT_API_URL = "https://dsat.apigateway.data.gov.mo/car_park_maintance"
-DSAT_API_CODE = os.getenv("DSAT_API_CODE", "09d43a591fba407fb862412970667de4")
+DSAT_API_CODE = os.getenv("DSAT_API_CODE")
 
 
 @app.route("/")

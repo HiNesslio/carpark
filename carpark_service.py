@@ -50,6 +50,8 @@ def parse_carpark_xml(xml_data):
 
 def calculate_distance_km(lat1, lng1, lat2, lng2):
     """使用 Haversine 公式計算兩點距離（公里）"""
+    if None in (lat1, lng1, lat2, lng2):
+        raise ValueError("所有座標參數都不能為 None")
     R = 6371
     dlat = math.radians(lat2 - lat1)
     dlng = math.radians(lng2 - lng1)

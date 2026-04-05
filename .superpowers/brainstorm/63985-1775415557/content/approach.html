@@ -1,0 +1,128 @@
+<h2>選擇設計方案</h2>
+<p class="subtitle">三個方案都能實現你的需求，差異在於佈局和交互方式</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-weight: bold;">🅿️ 澳門停車場</span>
+          <span style="color: #666; font-size: 11px;">📍 30s 更新</span>
+        </div>
+        <div style="background: #e8f5e9; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+          <div style="font-size: 10px; color: #666;">📍 你的位置已獲取</div>
+        </div>
+        <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 6px; border-left: 3px solid #4caf50;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: bold;">栢力停車場</span>
+            <span style="color: #666;">0.3km</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 6px;">
+            <span style="color: #4caf50;">🚗 280</span>
+            <span style="color: #999;">🚛 -</span>
+            <span style="color: #ff9800;">🛵 30</span>
+          </div>
+        </div>
+        <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 6px; border-left: 3px solid #ff9800;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: bold;">望信停車場</span>
+            <span style="color: #666;">0.8km</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 6px;">
+            <span style="color: #ff9800;">🚗 383</span>
+            <span style="color: #999;">🚛 262</span>
+            <span style="color: #4caf50;">🛵 44</span>
+          </div>
+        </div>
+        <div style="background: white; padding: 10px; border-radius: 4px; border-left: 3px solid #f44336;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: bold;">東啟大廈停車場</span>
+            <span style="color: #666;">1.2km</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 6px;">
+            <span style="color: #f44336;">🚗 264</span>
+            <span style="color: #999;">🚛 234</span>
+            <span style="color: #4caf50;">🛵 30</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 A：列表式（推薦）</h3>
+      <p>簡潔卡片列表，按距離排序，顏色顯示車位充足程度，一目了然</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-weight: bold;">🅿️ 澳門停車場</span>
+          <button style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">🔄 刷新</button>
+        </div>
+        <div style="background: #e3f2fd; border: 2px dashed #90caf9; padding: 20px; text-align: center; border-radius: 4px; margin-bottom: 8px;">
+          <div style="font-size: 11px; color: #666;">📍 地圖區域（可選）</div>
+          <div style="font-size: 10px; color: #999;">顯示停車場位置點</div>
+        </div>
+        <div style="display: flex; gap: 8px; overflow: hidden;">
+          <div style="background: white; padding: 8px; border-radius: 4px; min-width: 120px; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 11px;">栢力</div>
+            <div style="color: #4caf50; font-size: 14px; font-weight: bold;">280</div>
+            <div style="font-size: 9px; color: #666;">0.3km</div>
+          </div>
+          <div style="background: white; padding: 8px; border-radius: 4px; min-width: 120px; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 11px;">望信</div>
+            <div style="color: #ff9800; font-size: 14px; font-weight: bold;">383</div>
+            <div style="font-size: 9px; color: #666;">0.8km</div>
+          </div>
+          <div style="background: white; padding: 8px; border-radius: 4px; min-width: 120px; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 11px;">東啟</div>
+            <div style="color: #f44336; font-size: 14px; font-weight: bold;">264</div>
+            <div style="font-size: 9px; color: #666;">1.2km</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 B：地圖 + 橫向卡片</h3>
+      <p>上方顯示地圖，下方橫向滑動卡片，適合想看地理位置的用戶</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-weight: bold;">🅿️ 澳門停車場</span>
+          <span style="color: #666; font-size: 11px;">⚙️</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; color: #4caf50;">280</div>
+            <div style="font-size: 9px; color: #666;">栢力 - 輕型汽車</div>
+            <div style="font-size: 9px; color: #999;">0.3km</div>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; color: #ff9800;">383</div>
+            <div style="font-size: 9px; color: #666;">望信 - 輕型汽車</div>
+            <div style="font-size: 9px; color: #999;">0.8km</div>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; color: #f44336;">264</div>
+            <div style="font-size: 9px; color: #666;">東啟 - 輕型汽車</div>
+            <div style="font-size: 9px; color: #999;">1.2km</div>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; color: #4caf50;">30</div>
+            <div style="font-size: 9px; color: #666;">栢力 - 電單車</div>
+            <div style="font-size: 9px; color: #999;">0.3km</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 C：網格儀表板</h3>
+      <p>緊湊網格佈局，同時顯示更多停車場，適合桌面端快速掃描</p>
+    </div>
+  </div>
+</div>
