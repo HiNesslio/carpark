@@ -31,6 +31,8 @@ def api_carparks():
     try:
         xml_data = fetch_carpark_data()
         carparks = parse_carpark_xml(xml_data)
+    except ValueError as e:
+        return jsonify({"error": f"數據格式錯誤: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": f"數據獲取失敗: {str(e)}"}), 500
 

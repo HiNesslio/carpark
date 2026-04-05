@@ -58,3 +58,23 @@ def test_get_carpark_location_partial_match():
 def test_get_carpark_location_not_found():
     loc = get_carpark_location("不存在的停車場")
     assert loc is None
+
+
+import pytest
+
+
+def test_parse_invalid_xml():
+    with pytest.raises(ValueError, match="XML 解析失敗"):
+        parse_carpark_xml("<invalid><xml>")
+
+
+def test_parse_malformed_data():
+    xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+    <CarPark>
+        <Car_park_info name="測試停車場" Car_CNT="abc" Car_Total="100"
+                       Heavy_CNT="0" Heavy_Total="0"
+                       Moto_CNT="10" Moto_Total="20"
+                       UpdateTime="2026-04-06 10:00:00"/>
+    </CarPark>"""
+    result = parse_carpark_xml(xml_data)
+    assert result == []
