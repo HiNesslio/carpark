@@ -1,4 +1,15 @@
-from carpark_service import parse_carpark_xml
+from unittest.mock import patch, MagicMock
+from carpark_service import parse_carpark_xml, fetch_carpark_data, calculate_distance_km
+
+
+def test_calculate_distance_same_point():
+    assert calculate_distance_km(22.2, 113.5, 22.2, 113.5) == 0.0
+
+
+def test_calculate_distance_known_points():
+    # 澳門半島到氹仔約 3-5km
+    dist = calculate_distance_km(22.20, 113.54, 22.16, 113.55)
+    assert 3.0 < dist < 6.0
 
 
 def test_parse_valid_xml():
@@ -21,3 +32,13 @@ def test_parse_empty_xml():
     xml_data = '<?xml version="1.0" encoding="UTF-8"?><CarPark></CarPark>'
     result = parse_carpark_xml(xml_data)
     assert result == []
+
+
+def test_fetch_carpark_data():
+    mock_response = MagicMock()
+    mock_response.text = '<?xml version="1.0" encoding="UTF-8"?><CarPark></CarPark>'
+    
+    with patch("carpark_service.requests.get", return_value=mock_response) as mock_get:
+        result = fetch_carpark_data()
+        mock_get.assert_called_once()
+        assert result == '<?xml version="1.0" encoding="UTF-8"?><CarPark></CarPark>'
