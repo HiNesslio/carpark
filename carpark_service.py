@@ -2,6 +2,9 @@ import os
 import xml.etree.ElementTree as ET
 import requests
 import math
+from datetime import datetime, timezone, timedelta
+
+MACAO_TZ = timezone(timedelta(hours=8))
 
 DSAT_API_URL = "https://dsat.apigateway.data.gov.mo/car_park_maintance"
 DSAT_API_CODE = os.getenv("DSAT_API_CODE") or "09d43a591fba407fb862412970667de4"
