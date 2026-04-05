@@ -7,6 +7,7 @@ from carpark_service import (
     parse_carpark_xml,
     calculate_distance_km,
     MACAO_TZ,
+    reverse_geocode,
 )
 from carpark_locations import get_carpark_location
 
@@ -46,10 +47,13 @@ def api_carparks():
 
     result.sort(key=lambda x: x["distance_km"])
 
+    user_address = reverse_geocode(lat, lng)
+
     return jsonify({
         "updated_at": datetime.now(MACAO_TZ).isoformat(),
         "user_lat": lat,
         "user_lng": lng,
+        "user_address": user_address,
         "carparks": result,
     })
 

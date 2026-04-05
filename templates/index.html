@@ -160,6 +160,7 @@
             if (userLat === null || userLng === null) return;
             const btn = document.getElementById("refreshBtn");
             const status = document.getElementById("status");
+            const locationStatus = document.getElementById("locationStatus");
             btn.disabled = true;
             status.textContent = "更新中...";
             try {
@@ -167,6 +168,16 @@
                 if (!resp.ok) throw new Error("API 請求失敗");
                 const data = await resp.json();
                 renderCarparks(data);
+                
+                // 顯示用戶地址
+                if (data.user_address) {
+                    locationStatus.textContent = `📍 ${data.user_address}`;
+                    locationStatus.classList.remove("error");
+                } else {
+                    locationStatus.textContent = `📍 位置: ${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+                }
+                document.getElementById("refreshBtn").disabled = false;
+                
                 const now = new Date().toLocaleTimeString("zh-Hant");
                 status.textContent = `已更新 ${now}`;
             } catch (err) {
@@ -189,9 +200,6 @@
                 (pos) => {
                     userLat = pos.coords.latitude;
                     userLng = pos.coords.longitude;
-                    document.getElementById("locationStatus").textContent =
-                        `📍 位置已獲取`;
-                    document.getElementById("refreshBtn").disabled = false;
                     fetchCarparks();
                     startAutoRefresh();
                 },
@@ -201,7 +209,8 @@
                     el.classList.add("error");
                     document.getElementById("carparkList").innerHTML =
                         '<div class="error-msg">請在瀏覽器設置中允許位置訪問</div>';
-                }
+                },
+                { timeout: 10000, maximumAge: 60000 }
             );
         } else {
             document.getElementById("locationStatus").textContent =

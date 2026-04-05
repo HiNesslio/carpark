@@ -17,9 +17,9 @@ def test_parse_valid_xml():
     xml_data = """<?xml version="1.0" encoding="UTF-8"?>
     <CarPark>
         <Car_park_info name="栢力停車場" Car_CNT="280" Car_Total="417"
-                       Heavy_CNT="0" Heavy_Total="0"
-                       Moto_CNT="30" Moto_Total="32"
-                       UpdateTime="2026-04-06 10:30:00"/>
+                       OT_A_CNT="0" OT_A_Total="0"
+                       MB_CNT="30" MB_Total="32"
+                       Time="2026-04-06 10:30:00"/>
     </CarPark>"""
     result = parse_carpark_xml(xml_data)
     assert len(result) == 1
@@ -72,9 +72,9 @@ def test_parse_malformed_data():
     xml_data = """<?xml version="1.0" encoding="UTF-8"?>
     <CarPark>
         <Car_park_info name="測試停車場" Car_CNT="abc" Car_Total="100"
-                       Heavy_CNT="0" Heavy_Total="0"
-                       Moto_CNT="10" Moto_Total="20"
-                       UpdateTime="2026-04-06 10:00:00"/>
+                       OT_A_CNT="0" OT_A_Total="0"
+                       MB_CNT="10" MB_Total="20"
+                       Time="2026-04-06 10:00:00"/>
     </CarPark>"""
     result = parse_carpark_xml(xml_data)
     # 應該跳過格式錯誤的記錄
@@ -86,9 +86,9 @@ def test_parse_zero_total():
     xml_data = """<?xml version="1.0" encoding="UTF-8"?>
     <CarPark>
         <Car_park_info name="栢力停車場" Car_CNT="280" Car_Total="0"
-                       Heavy_CNT="0" Heavy_Total="0"
-                       Moto_CNT="30" Moto_Total="0"
-                       UpdateTime="2026-04-06 10:30:00"/>
+                       OT_A_CNT="0" OT_A_Total="0"
+                       MB_CNT="30" MB_Total="0"
+                       Time="2026-04-06 10:30:00"/>
     </CarPark>"""
     result = parse_carpark_xml(xml_data)
     assert len(result) == 1
@@ -121,3 +121,34 @@ def test_status_calculation_with_zero_total():
     assert get_status(280, 417) == "good"   # 67% > 50%
     assert get_status(100, 417) == "medium" # 24% > 20%
     assert get_status(50, 417) == "bad"      # 12% < 20%
+
+
+def test_parse_motorcycle_field_names():
+    """測試電單車字段名稱 - 可能使用不同的字段名"""
+    # DSAT API 使用不同的字段名稱:
+    # Car_CNT = 輕型汽車, MB_CNT = 電單車, OT_A_CNT = 重型汽車
+    xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+    <CarPark>
+        <Car_park_info name="下環街市" Car_CNT="28" MB_CNT="57" 
+                       OT_A_CNT="10" ELC_CNT="2" DC_CNT="2"
+                       Time="4/6/2026 4:32:13 AM"/>
+    </CarPark>"""
+    result = parse_carpark_xml(xml_data)
+    assert len(result) == 1
+    # 輕型汽車: Car_CNT = 28
+    assert result[0]["light_vehicle"]["available"] == 28
+    # 電單車: MB_CNT = 57
+    assert result[0]["motorcycle"]["available"] == 57
+    # 重型汽車: OT_A_CNT = 10
+    assert result[0]["heavy_vehicle"]["available"] == 10
+
+
+def test_reverse_geocoding():
+    """測試逆地理編碼功能 - 將座標轉換為街名"""
+    from carpark_service import reverse_geocode
+    
+    # Test with Macau coordinates
+    result = reverse_geocode(22.1987, 113.5439)
+    # Should return a display name with street info
+    assert result is not None
+    assert "澳門" in result or "Macau" in result or "路" in result or "街" in result
