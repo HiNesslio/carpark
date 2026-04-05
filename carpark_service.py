@@ -21,7 +21,7 @@ def fetch_carpark_data(max_retries=2):
             last_error = "DSAT API 超時"
         except requests.exceptions.RequestException as e:
             last_error = f"網絡錯誤: {str(e)}"
-    raise Exception(last_error)
+    raise Exception(last_error or "DSAT API 請求失敗")
 
 
 def parse_carpark_xml(xml_data):
