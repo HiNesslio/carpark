@@ -45,3 +45,21 @@ def test_carparks_api_returns_sorted(mock_parse, mock_fetch, client):
 def test_carparks_api_missing_params(client):
     resp = client.get("/api/carparks")
     assert resp.status_code == 400
+
+
+@patch("app.fetch_carpark_data")
+def test_carparks_api_fetch_error(mock_fetch, client):
+    mock_fetch.side_effect = Exception("網絡錯誤")
+    resp = client.get("/api/carparks?lat=22.20&lng=113.54")
+    assert resp.status_code == 500
+
+
+@patch("app.fetch_carpark_data")
+@patch("app.parse_carpark_xml")
+def test_carparks_api_empty_list(mock_parse, mock_fetch, client):
+    mock_fetch.return_value = "<xml/>"
+    mock_parse.return_value = []
+    resp = client.get("/api/carparks?lat=22.20&lng=113.54")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["carparks"] == []
