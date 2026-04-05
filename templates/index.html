@@ -104,7 +104,11 @@
         let userLng = null;
         let refreshInterval = null;
 
-        function getStatusClass(ratio) {
+        function getStatusClass(ratio, available, total) {
+            // 當 total 為 0 時，如果有可用車位，視為充足
+            if (total === 0) {
+                return available > 0 ? "good" : "bad";
+            }
             if (ratio > 0.5) return "good";
             if (ratio > 0.2) return "medium";
             return "bad";
@@ -128,20 +132,24 @@
             }
             list.innerHTML = data.carparks.map(cp => {
                 const lv = cp.light_vehicle;
-                const ratio = lv.total > 0 ? lv.available / lv.total : 0;
-                const status = getStatusClass(ratio);
+                const lvRatio = lv.total > 0 ? lv.available / lv.total : 0;
+                const lvStatus = getStatusClass(lvRatio, lv.available, lv.total);
                 const hv = cp.heavy_vehicle;
+                const hvRatio = hv.total > 0 ? hv.available / hv.total : 0;
+                const hvStatus = getStatusClass(hvRatio, hv.available, hv.total);
                 const mc = cp.motorcycle;
+                const mcRatio = mc.total > 0 ? mc.available / mc.total : 0;
+                const mcStatus = getStatusClass(mcRatio, mc.available, mc.total);
                 return `
-                    <div class="carpark-card status-${status}">
+                    <div class="carpark-card status-${lvStatus}">
                         <div class="carpark-header">
                             <span class="carpark-name">${escapeHtml(cp.name)}</span>
                             <span class="carpark-distance">${escapeHtml(cp.distance_km)}km</span>
                         </div>
                         <div class="carpark-slots">
-                            <span class="slot-${status}">🚗 ${lv.available}/${lv.total}</span>
-                            <span class="slot-${getStatusClass(hv.total > 0 ? hv.available / hv.total : 0)}">🚛 ${hv.available}/${hv.total}</span>
-                            <span class="slot-${getStatusClass(mc.total > 0 ? mc.available / mc.total : 0)}">🛵 ${mc.available}/${mc.total}</span>
+                            <span class="slot-${lvStatus}">🚗 ${lv.available}/${lv.total}</span>
+                            <span class="slot-${hvStatus}">🚛 ${hv.available}/${hv.total}</span>
+                            <span class="slot-${mcStatus}">🛵 ${mc.available}/${mc.total}</span>
                         </div>
                     </div>
                 `;
