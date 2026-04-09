@@ -152,3 +152,79 @@ def test_reverse_geocoding():
     # Should return a display name with street info
     assert result is not None
     assert "澳門" in result or "Macau" in result or "路" in result or "街" in result
+
+
+def test_fetch_total_capacity_from_info_page():
+    """從停車場資料頁面獲取總車位數據"""
+    from carpark_service import fetch_total_capacity_data
+    
+    result = fetch_total_capacity_data()
+    assert result is not None
+    # 望信: 輕型=530, 電單=338
+    assert "望信" in result
+    assert result["望信"]["light_vehicle"] == 530
+    assert result["望信"]["motorcycle"] == 338
+    # 關閘: 輕型=788, 電單=800
+    assert "關閘" in result
+    assert result["關閘"]["light_vehicle"] == 788
+    assert result["關閘"]["motorcycle"] == 800
+
+
+def test_merge_carpark_data():
+    """合併即時數據與總車位數據"""
+    from carpark_service import merge_carpark_data
+    
+    realtime = [
+        {
+            "name": "栢力停車場",
+            "light_vehicle": {"available": 280, "total": 0},
+            "heavy_vehicle": {"available": 0, "total": 0},
+            "motorcycle": {"available": 30, "total": 0},
+        },
+    ]
+    
+    total_capacity = {
+        "栢力停車場": {
+            "light_vehicle": 417,
+            "motorcycle": 32,
+            "heavy_vehicle": 0,
+        }
+    }
+    
+    result = merge_carpark_data(realtime, total_capacity)
+    
+    assert len(result) == 1
+    assert result[0]["light_vehicle"]["total"] == 417
+    assert result[0]["light_vehicle"]["available"] == 280
+    assert result[0]["motorcycle"]["total"] == 32
+    assert result[0]["motorcycle"]["available"] == 30
+
+
+def test_fetch_ev_data():
+    """測試從 CEM 網站爬取 EV 數據"""
+    from carpark_service import fetch_ev_data
+    
+    result = fetch_ev_data()
+    assert isinstance(result, dict)
+    assert result is not None
+
+
+def test_merge_ev_data():
+    """測試將 EV 數據合併到停車場列表"""
+    from carpark_service import merge_ev_data
+    
+    carparks = [
+        {"name": "港珠澳大橋邊檢大樓東公共停車場 ", 
+         "light_vehicle": {"available": 100, "total": 3000}},
+        {"name": "栢力停車場",
+         "light_vehicle": {"available": 50, "total": 417}},
+    ]
+    
+    ev_data = {
+        "港珠澳大橋邊檢大樓東公共停車場 ": 4,
+    }
+    
+    result = merge_ev_data(carparks, ev_data)
+    
+    assert result[0].get("ev_charging") == 4
+    assert result[1].get("ev_charging") == 0

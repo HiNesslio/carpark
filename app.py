@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 import os
+import time
 from datetime import datetime
 
 from carpark_service import (
@@ -8,6 +9,10 @@ from carpark_service import (
     calculate_distance_km,
     MACAO_TZ,
     reverse_geocode,
+    fetch_total_capacity_data,
+    merge_carpark_data,
+    fetch_ev_data,
+    merge_ev_data,
 )
 from carpark_locations import get_carpark_location
 
@@ -15,6 +20,31 @@ app = Flask(__name__, template_folder="templates")
 
 DSAT_API_URL = "https://dsat.apigateway.data.gov.mo/car_park_maintance"
 DSAT_API_CODE = os.getenv("DSAT_API_CODE")
+
+_total_capacity_cache = None
+_ev_cache = None
+_ev_cache_time = None
+EV_CACHE_DURATION = 300  # 5 分鐘
+
+
+def get_total_capacity():
+    """取得總車位數據（帶緩存）"""
+    global _total_capacity_cache
+    if _total_capacity_cache is None:
+        _total_capacity_cache = fetch_total_capacity_data()
+    return _total_capacity_cache
+
+
+def get_ev_data():
+    """取得 EV 數據（帶緩存）"""
+    global _ev_cache, _ev_cache_time
+    
+    now = time.time()
+    if _ev_cache is None or (_ev_cache_time and now - _ev_cache_time > EV_CACHE_DURATION):
+        _ev_cache = fetch_ev_data()
+        _ev_cache_time = now
+    
+    return _ev_cache
 
 
 @app.route("/")
@@ -26,6 +56,7 @@ def index():
 def api_carparks():
     lat = request.args.get("lat", type=float)
     lng = request.args.get("lng", type=float)
+    ev_only = request.args.get("ev_only", "false").lower() == "true"
 
     if lat is None or lng is None:
         return jsonify({"error": "需要提供 lat 和 lng 參數"}), 400
@@ -33,6 +64,16 @@ def api_carparks():
     try:
         xml_data = fetch_carpark_data()
         carparks = parse_carpark_xml(xml_data)
+        
+        total_capacity = get_total_capacity()
+        carparks = merge_carpark_data(carparks, total_capacity)
+        
+        ev_data = get_ev_data()
+        carparks = merge_ev_data(carparks, ev_data)
+        
+        if ev_only:
+            carparks = [cp for cp in carparks if cp.get("ev_charging", 0) > 0]
+            
     except ValueError as e:
         return jsonify({"error": f"數據格式錯誤: {str(e)}"}), 500
     except Exception as e:
@@ -54,6 +95,7 @@ def api_carparks():
         "user_lat": lat,
         "user_lng": lng,
         "user_address": user_address,
+        "ev_mode": ev_only,
         "carparks": result,
     })
 
