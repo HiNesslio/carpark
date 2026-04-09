@@ -1,0 +1,28 @@
+// Prisma Schema for Macau Car Park Application
+// PostgreSQL database with TypeScript ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CarPark {
+  id              String   @id
+  name            String
+  nameZh          String?  @map("name_zh")
+  address         String?
+  addressZh       String?  @map("address_zh")
+  totalSpaces     Int      @map("total_spaces")
+  availableSpaces Int      @map("available_spaces")
+  latitude        Float?
+  longitude       Float?
+  lastUpdated     DateTime @map("last_updated")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("car_parks")
+}
