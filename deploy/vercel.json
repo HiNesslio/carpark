@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pip install -r requirements.txt",
+  "outputDirectory": ".",
+  "framework": "flask",
+  "installCommand": "pip install -r requirements.txt",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/app.py"
+    }
+  ]
+}

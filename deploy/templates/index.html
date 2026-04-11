@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門停車場實時資訊</title>
+    <style>
+        /* Claude Design System - Warm Parchment Theme */
+        :root {
+            /* Primary Colors */
+            --near-black: #141413;
+            --terracotta: #c96442;
+            --coral: #d97757;
+            
+            /* Surface & Background */
+            --parchment: #f5f4ed;
+            --ivory: #faf9f5;
+            --white: #ffffff;
+            --warm-sand: #e8e6dc;
+            --dark-surface: #30302e;
+            --deep-dark: #141413;
+            
+            /* Neutrals */
+            --charcoal-warm: #4d4c48;
+            --olive-gray: #5e5d59;
+            --stone-gray: #87867f;
+            --dark-warm: #3d3d3a;
+            --warm-silver: #b0aea5;
+            
+            /* Borders */
+            --border-cream: #f0eee6;
+            --border-warm: #e8e6dc;
+            --ring-warm: #d1cfc5;
+            
+            /* Semantic */
+            --error-crimson: #b53333;
+            --focus-blue: #3898ec;
+            
+            /* Status Colors */
+            --status-good: #4caf50;
+            --status-medium: #ff9800;
+            --status-bad: #f44336;
+            --status-good-rgb: 76, 175, 80;
+            --status-medium-rgb: 255, 152, 0;
+            --status-bad-rgb: 244, 67, 54;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background: var(--parchment);
+            color: var(--near-black);
+            line-height: 1.60;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 1.20;
+            color: var(--near-black);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--olive-gray);
+            margin-bottom: 20px;
+        }
+
+        /* Location & Map Section */
+        .location-section {
+            background: var(--ivory);
+            border-radius: 16px;
+            border: 1px solid var(--border-cream);
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-warm);
+        }
+
+        .location-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+        }
+
+        .location-address {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--charcoal-warm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .location-status {
+            font-size: 12px;
+            color: var(--stone-gray);
+        }
+
+        /* Refresh Button */
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--terracotta);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s ease;
+            box-shadow: 0px 0px 0px 1px var(--terracotta);
+            flex-shrink: 0;
+        }
+
+        .refresh-btn:hover {
+            background: var(--coral);
+            box-shadow: 0px 0px 0px 1px var(--coral);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Control Bar - Original design */
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--ivory);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-cream);
+            margin-bottom: 16px;
+            box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Vehicle Type Toggles */
+        .vehicle-toggles-section {
+            background: var(--ivory);
+            border-radius: 16px;
+            border: 1px solid var(--border-cream);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: rgba(0,0,0,0.03) 0px 2px 8px;
+        }
+
+        .vehicle-toggles {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .vehicle-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--warm-sand);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            border: 1px solid transparent;
+            flex: 1;
+        }
+
+        .vehicle-toggle:hover {
+            background: var(--border-warm);
+        }
+
+        .vehicle-toggle.active {
+            background: var(--terracotta);
+            border-color: var(--terracotta);
+        }
+
+        .vehicle-toggle.active .vehicle-icon,
+        .vehicle-toggle.active .vehicle-label {
+            color: var(--white);
+        }
+
+        .vehicle-toggle input {
+            display: none;
+        }
+
+        .vehicle-icon {
+            font-size: 16px;
+        }
+
+        .vehicle-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--charcoal-warm);
+            white-space: nowrap;
+        }
+
+        /* Last Updated */
+        .last-updated {
+            font-size: 12px;
+            color: var(--stone-gray);
+            text-align: right;
+            margin-bottom: 16px;
+        }
+
+        /* Carpark Cards */
+        .carpark-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .carpark-card {
+            background: var(--ivory);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-cream);
+            box-shadow: rgba(0,0,0,0.02) 0px 2px 8px;
+            transition: 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carpark-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .carpark-card.status-good::before { background: var(--status-good); }
+        .carpark-card.status-medium::before { background: var(--status-medium); }
+        .carpark-card.status-bad::before { background: var(--status-bad); }
+
+        .carpark-card:hover {
+            box-shadow: rgba(0,0,0,0.05) 0px 4px 16px;
+            transform: translateY(-1px);
+        }
+
+        .carpark-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .carpark-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--near-black);
+            line-height: 1.30;
+        }
+
+        .carpark-distance {
+            font-size: 13px;
+            color: var(--stone-gray);
+            background: var(--warm-sand);
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* Parking Slots */
+        .carpark-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .slot-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            padding: 8px 12px;
+            background: var(--white);
+            border-radius: 8px;
+            border: 1px solid var(--border-warm);
+        }
+
+        .slot-icon {
+            font-size: 16px;
+        }
+
+        .slot-count {
+            font-weight: 500;
+            font-feature-settings: "tnum";
+        }
+
+        .slot-good .slot-count { color: var(--status-good); }
+        .slot-medium .slot-count { color: var(--status-medium); }
+        .slot-bad .slot-count { color: var(--status-bad); }
+
+        /* EV Badge */
+        .carpark-ev {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .carpark-ev-icon {
+            font-size: 14px;
+        }
+
+        /* Loading & Error States */
+        .state-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .state-title {
+            font-family: Georgia, serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--charcoal-warm);
+            margin-bottom: 8px;
+        }
+
+        .state-message {
+            font-size: 14px;
+            color: var(--olive-gray);
+        }
+
+        .loading .state-icon { animation: pulse 1.5s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .error-container {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .error-container .state-title { color: var(--error-crimson); }
+        .error-container .state-message { color: #991b1b; }
+
+        /* Empty State */
+        .empty-state {
+            background: var(--ivory);
+            border: 1px dashed var(--border-warm);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .empty-state .state-icon { font-size: 40px; }
+
+        /* Location Status Banner */
+        .location-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--ivory);
+            border-radius: 12px;
+            border: 1px solid var(--border-cream);
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--olive-gray);
+        }
+
+        .location-banner.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: var(--error-crimson);
+        }
+
+        .location-banner-icon {
+            font-size: 18px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .header-title {
+                font-size: 26px;
+            }
+
+            .control-bar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .controls-right {
+                justify-content: space-between;
+            }
+
+            .carpark-card {
+                padding: 16px;
+            }
+
+            .carpark-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .carpark-name {
+                font-size: 16px;
+            }
+
+            .carpark-slots {
+                gap: 8px;
+            }
+
+            .slot-item {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="header-title">🅿️ 澳門停車場</h1>
+            <p class="header-subtitle">即時車位資訊 · 附近停車場一目了然</p>
+        </header>
+
+        <div class="location-section">
+            <div class="location-header">
+                <div class="location-info">
+                    <span class="location-address" id="locationAddress">📍 正在獲取您的位置...</span>
+                    <span class="location-status" id="locationStatus">等待定位...</span>
+                </div>
+                <button class="refresh-btn" id="refreshBtn" disabled>🔄</button>
+            </div>
+            <div class="map-container" id="mapContainer">
+                <div class="map-placeholder" id="mapPlaceholder">載入地圖中...</div>
+            </div>
+        </div>
+
+        <div class="vehicle-toggles-section">
+            <div class="vehicle-toggles">
+                <label class="vehicle-toggle" id="toggleCar">
+                    <input type="checkbox" value="car" checked>
+                    <span class="vehicle-icon">🚗</span>
+                    <span class="vehicle-label">私家車</span>
+                </label>
+                <label class="vehicle-toggle" id="toggleMotorcycle">
+                    <input type="checkbox" value="motorcycle">
+                    <span class="vehicle-icon">🛵</span>
+                    <span class="vehicle-label">電單車</span>
+                </label>
+                <label class="vehicle-toggle" id="toggleTruck">
+                    <input type="checkbox" value="truck">
+                    <span class="vehicle-icon">🚛</span>
+                    <span class="vehicle-label">貨車</span>
+                </label>
+                <label class="vehicle-toggle" id="toggleEV">
+                    <input type="checkbox" value="ev">
+                    <span class="vehicle-icon">⚡</span>
+                    <span class="vehicle-label">EV</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="last-updated" id="lastUpdated"></div>
+
+        <div class="carpark-list" id="carparkList">
+            <div class="state-container loading">
+                <div class="state-icon">🅿️</div>
+                <div class="state-title">等待定位完成</div>
+                <div class="state-message">正在獲取您的位置資訊...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userLat = null;
+        let userLng = null;
+        let refreshInterval = null;
+
+        function getStatusClass(ratio, available, total) {
+            if (total === 0) {
+                return available > 0 ? "good" : "bad";
+            }
+            if (ratio > 0.5) return "good";
+            if (ratio > 0.2) return "medium";
+            return "bad";
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getSlotHtml(type, available, total, status) {
+            const icons = {
+                light_vehicle: '🚗',
+                heavy_vehicle: '🚛',
+                motorcycle: '🛵'
+            };
+            const labels = {
+                light_vehicle: '輕型車',
+                heavy_vehicle: '重型車',
+                motorcycle: '電單車'
+            };
+            if (total === 0) return '';
+            return `
+                <div class="slot-item slot-${status}">
+                    <span class="slot-icon">${icons[type] || '📍'}</span>
+                    <span class="slot-label">${labels[type] || type}</span>
+                    <span class="slot-count">${available}/${total}</span>
+                </div>
+            `;
+        }
+
+        function renderCarparks(data) {
+            const list = document.getElementById("carparkList");
+            
+            // Get selected vehicle types
+            const selectedTypes = [];
+            if (document.getElementById('toggleCar').querySelector('input').checked) selectedTypes.push('car');
+            if (document.getElementById('toggleMotorcycle').querySelector('input').checked) selectedTypes.push('motorcycle');
+            if (document.getElementById('toggleTruck').querySelector('input').checked) selectedTypes.push('truck');
+            if (document.getElementById('toggleEV').querySelector('input').checked) selectedTypes.push('ev');
+            
+            // If nothing selected, show all
+            const showAll = selectedTypes.length === 0;
+            
+            // Filter carparks based on selected types
+            const filteredCarparks = data.carparks.filter(cp => {
+                if (showAll) return true;
+                
+                const hasCar = cp.light_vehicle.total > 0;
+                const hasMotorcycle = cp.motorcycle.total > 0;
+                const hasTruck = cp.heavy_vehicle.total > 0;
+                const hasEV = cp.ev_charging > 0;
+                
+                // Check if carpark has any of the selected types
+                if (selectedTypes.includes('car') && hasCar) return true;
+                if (selectedTypes.includes('motorcycle') && hasMotorcycle) return true;
+                if (selectedTypes.includes('truck') && hasTruck) return true;
+                if (selectedTypes.includes('ev') && hasEV) return true;
+                
+                return false;
+            });
+            
+            if (!filteredCarparks || filteredCarparks.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="state-icon">🔍</div>
+                        <div class="state-title">暫無符合條件的停車場</div>
+                        <div class="state-message">請選擇其他車輛類型</div>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filteredCarparks.map(cp => {
+                const lv = cp.light_vehicle;
+                const lvRatio = lv.total > 0 ? lv.available / lv.total : 0;
+                const lvStatus = getStatusClass(lvRatio, lv.available, lv.total);
+                
+                const hv = cp.heavy_vehicle;
+                const hvRatio = hv.total > 0 ? hv.available / hv.total : 0;
+                const hvStatus = getStatusClass(hvRatio, hv.available, hv.total);
+                
+                const mc = cp.motorcycle;
+                const mcRatio = mc.total > 0 ? mc.available / mc.total : 0;
+                const mcStatus = getStatusClass(mcRatio, mc.available, mc.total);
+
+                // Only show slots for selected types
+                let slotsHtml = '';
+                if (showAll || selectedTypes.includes('car')) {
+                    slotsHtml += getSlotHtml('light_vehicle', lv.available, lv.total, lvStatus);
+                }
+                if (showAll || selectedTypes.includes('truck')) {
+                    slotsHtml += getSlotHtml('heavy_vehicle', hv.available, hv.total, hvStatus);
+                }
+                if (showAll || selectedTypes.includes('motorcycle')) {
+                    slotsHtml += getSlotHtml('motorcycle', mc.available, mc.total, mcStatus);
+                }
+
+                // Determine overall status based on visible slots
+                let overallStatus = 'bad';
+                if ((showAll || selectedTypes.includes('car')) && lv.total > 0) overallStatus = lvStatus;
+                else if ((showAll || selectedTypes.includes('truck')) && hv.total > 0) overallStatus = hvStatus;
+                else if ((showAll || selectedTypes.includes('motorcycle')) && mc.total > 0) overallStatus = mcStatus;
+
+                return `
+                    <div class="carpark-card status-${overallStatus}">
+                        <div class="carpark-header">
+                            <span class="carpark-name">${escapeHtml(cp.name)}</span>
+                            <span class="carpark-distance">${cp.distance_km ? parseFloat(cp.distance_km).toFixed(1) + ' km' : ''}</span>
+                        </div>
+                        <div class="carpark-slots">
+                            ${slotsHtml}
+                        </div>
+                        ${(showAll || selectedTypes.includes('ev')) && cp.ev_charging > 0 ? `
+                            <div class="carpark-ev">
+                                <span class="carpark-ev-icon">⚡</span>
+                                <span>${cp.ev_charging} 個可用的 EV 充電位</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function updateLocationDisplay(data) {
+            const addressEl = document.getElementById("locationAddress");
+            const statusEl = document.getElementById("locationStatus");
+            
+            if (data.user_address) {
+                addressEl.textContent = `📍 ${data.user_address}`;
+                statusEl.textContent = "定位成功";
+            } else {
+                addressEl.textContent = `📍 您的位置`;
+                statusEl.textContent = "定位成功";
+            }
+            
+            // Update map - only once on first load
+            if (userLat && userLng && !document.getElementById("mapContainer").querySelector('iframe')) {
+                updateMap(userLat, userLng);
+            }
+        }
+
+        function updateMap(lat, lng) {
+            const mapContainer = document.getElementById("mapContainer");
+            if (!lat || !lng) return;
+            
+            // Google Maps embed centered on user location
+            mapContainer.innerHTML = `<iframe 
+                src="https://www.google.com/maps?z=15&t=m&q=${lat},${lng}&output=embed"
+                width="100%" 
+                height="180" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>`;
+        }
+
+        function showLocationError(message) {
+            const addressEl = document.getElementById("locationAddress");
+            const statusEl = document.getElementById("locationStatus");
+            addressEl.textContent = "❌ 無法獲取位置";
+            statusEl.textContent = message;
+            
+            document.getElementById("mapContainer").innerHTML = `
+                <div class="map-placeholder">${message}</div>
+            `;
+            
+            document.getElementById("carparkList").innerHTML = `
+                <div class="error-container">
+                    <div class="state-icon">⚠️</div>
+                    <div class="state-title">需要位置權限</div>
+                    <div class="state-message">請在瀏覽器設置中允許位置訪問，以顯示附近停車場</div>
+                </div>
+            `;
+        }
+
+        async function fetchCarparks() {
+            if (userLat === null || userLng === null) return;
+            
+            const btn = document.getElementById("refreshBtn");
+            const lastUpdated = document.getElementById("lastUpdated");
+            
+            btn.disabled = true;
+            btn.classList.add("spinning");
+            
+            // Update toggle active states
+            document.querySelectorAll('.vehicle-toggle').forEach(toggle => {
+                const input = toggle.querySelector('input');
+                toggle.classList.toggle('active', input.checked);
+            });
+            
+            try {
+                let url = `/api/carparks?lat=${userLat}&lng=${userLng}`;
+                
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error("API 請求失敗");
+                
+                const data = await resp.json();
+                renderCarparks(data);
+                updateLocationDisplay(data);
+                
+                const now = new Date();
+                lastUpdated.textContent = `最後更新: ${now.toLocaleTimeString("zh-Hant", { hour: '2-digit', minute: '2-digit' })}`;
+                
+            } catch (err) {
+                document.getElementById("carparkList").innerHTML = `
+                    <div class="error-container">
+                        <div class="state-icon">⚠️</div>
+                        <div class="state-title">數據獲取失敗</div>
+                        <div class="state-message">${err.message || '請稍後重試'}</div>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove("spinning");
+            }
+        }
+
+        // 獲取用戶位置 - 只在首次獲取，不自動刷新
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    fetchCarparks();
+                    // 不再自動刷新，只用戶手動點擊刷新
+                },
+                (err) => {
+                    let message = "無法獲取您的位置";
+                    if (err.code === 1) message = "需要位置權限才能顯示附近停車場";
+                    else if (err.code === 2) message = "無法確定您的位置";
+                    else if (err.code === 3) message = "定位逾時，請重試";
+                    showLocationError(message);
+                },
+                { timeout: 10000, maximumAge: 60000 }
+            );
+        } else {
+            showLocationError("您的瀏覽器不支持定位功能");
+        }
+
+        // 手動刷新
+        document.getElementById("refreshBtn").addEventListener("click", fetchCarparks);
+        
+        // 車輛類型切換
+        document.querySelectorAll('.vehicle-toggle input').forEach(input => {
+            input.addEventListener('change', fetchCarparks);
+        });
+    </script>
+</body>
+</html>
