@@ -127,14 +127,42 @@ def api_carparks():
 
     try:
         # 獲取即時數據
-        headers = {"Ocp-Apim-Subscription-Key": DSAT_API_CODE, "user-agent": "MacauCarpark/1.0"}
+        headers = {
+            "Ocp-Apim-Subscription-Key": DSAT_API_CODE,
+            "user-agent": "MacauCarpark/1.0",
+            "Accept": "application/xml"
+        }
+        
+        # 添加調試日誌
+        print(f"[DEBUG] Calling DSAT API: {DSAT_API_URL}")
+        print(f"[DEBUG] Using subscription key: {DSAT_API_CODE[:8]}...")
+        
         response = requests.get(DSAT_API_URL, headers=headers, timeout=15)
+        
+        print(f"[DEBUG] Response status: {response.status_code}")
+        print(f"[DEBUG] Response headers: {dict(response.headers)}")
+        print(f"[DEBUG] Response text (first 500 chars): {response.text[:500] if response.text else 'EMPTY'}")
+        
         response.encoding = "UTF-8"
         
         if response.status_code != 200:
-            return jsonify({"error": f"API錯誤: {response.status_code}", "carparks": []}), 500
+            return jsonify({
+                "error": f"API錯誤: {response.status_code}", 
+                "debug_info": {
+                    "status_code": response.status_code,
+                    "response_text": response.text[:500] if response.text else "EMPTY"
+                },
+                "carparks": []
+            }), 500
             
         xml_data = response.text
+    except requests.exceptions.Timeout:
+        return jsonify({"error": "API 超時", "carparks": []}), 500
+    except requests.exceptions.ConnectionError as e:
+        return jsonify({
+            "error": f"連接失敗: {str(e)}", 
+            "carparks": []
+        }), 500
     except Exception as e:
         return jsonify({"error": f"獲取數據失敗: {str(e)}", "carparks": []}), 500
 
