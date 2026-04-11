@@ -106,6 +106,12 @@ def reverse_geocode(lat, lng):
 
 # ============ API ============
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    return response
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -121,12 +127,16 @@ def api_carparks():
 
     try:
         # 獲取即時數據
-        headers = {"Authorization": DSAT_API_CODE, "user-agent": "MacauCarpark/1.0"}
+        headers = {"Ocp-Apim-Subscription-Key": DSAT_API_CODE, "user-agent": "MacauCarpark/1.0"}
         response = requests.get(DSAT_API_URL, headers=headers, timeout=15)
         response.encoding = "UTF-8"
+        
+        if response.status_code != 200:
+            return jsonify({"error": f"API錯誤: {response.status_code}", "carparks": []}), 500
+            
         xml_data = response.text
-    except:
-        xml_data = '<?xml version="1.0"?><CarPark></CarPark>'
+    except Exception as e:
+        return jsonify({"error": f"獲取數據失敗: {str(e)}", "carparks": []}), 500
 
     try:
         root = ET.fromstring(xml_data)
