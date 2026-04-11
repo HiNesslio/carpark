@@ -126,9 +126,9 @@ def api_carparks():
         return jsonify({"error": "需要提供 lat 和 lng 參數"}), 400
 
     try:
-        # 獲取即時數據
+        # 獲取即時數據 - 使用與本地版本相同的 header
         headers = {
-            "Ocp-Apim-Subscription-Key": DSAT_API_CODE,
+            "Authorization": f"APPCODE {DSAT_API_CODE}",
             "user-agent": "MacauCarpark/1.0",
             "Accept": "application/xml"
         }
