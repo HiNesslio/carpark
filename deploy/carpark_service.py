@@ -181,7 +181,43 @@ def fetch_total_capacity_data():
         
         return result
     except Exception as e:
-        raise Exception(f"獲取停車場資料失敗: {str(e)}")
+        return extra_capacity
+
+
+# EV 停車場數據（靜態數據）
+EV_CARPARK_DATA = {
+    "港珠澳大橋邊檢大樓東公共停車場 ": 4,
+    "港珠澳大橋邊檢大樓西停車場": 4,
+    "氹仔中央公園": 6,
+    "何賢公園": 4,
+    "快達樓": 2,
+    "亞馬喇前地": 4,
+    "馬六甲街": 2,
+    "青怡大廈": 2,
+    "華士古達嘉馬花園": 4,
+    "湖畔大廈": 4,
+    "業興大廈": 2,
+    "交通教育局大樓": 2,
+}
+
+
+def merge_ev_data(carparks):
+    """將 EV 充電位數據合併到停車場列表"""
+    result = []
+    for cp in carparks:
+        cp_copy = cp.copy()
+        cp_copy["ev_charging"] = 0
+        
+        cp_name = cp.get("name", "")
+        
+        for ev_name, ev_count in EV_CARPARK_DATA.items():
+            if ev_name in cp_name or cp_name in ev_name:
+                cp_copy["ev_charging"] = ev_count
+                break
+        
+        result.append(cp_copy)
+    
+    return result
 
 
 def merge_carpark_data(realtime_data, total_capacity):
