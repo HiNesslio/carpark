@@ -31,8 +31,11 @@ RUN pip install --no-cache-dir playwright \
 # Copy application code
 COPY . .
 
+# Make start script executable
+RUN chmod +x start.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start with gunicorn (shell form for env var interpolation)
-CMD gunicorn app:app --bind 0.0.0.0:$PORT
+# Start with wrapper script
+CMD ["./start.sh"]
