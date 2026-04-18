@@ -21,6 +21,13 @@ app = Flask(__name__, template_folder="templates")
 DSAT_API_URL = "https://dsat.apigateway.data.gov.mo/car_park_maintance"
 DSAT_API_CODE = os.getenv("DSAT_API_CODE")
 
+# CORS support
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    return response
+
 _total_capacity_cache = None
 _ev_cache = None
 _ev_cache_time = None
