@@ -28,6 +28,9 @@ RUN pip install --no-cache-dir playwright \
     && playwright install chromium \
     && playwright install-deps
 
+# Copy application code
+COPY . .
+
 # Expose port
 EXPOSE 8080
 
