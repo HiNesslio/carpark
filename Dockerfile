@@ -28,14 +28,8 @@ RUN pip install --no-cache-dir playwright \
     && playwright install chromium \
     && playwright install-deps
 
-# Copy application code
-COPY . .
-
-# Make start script executable
-RUN chmod +x start.sh
-
 # Expose port
 EXPOSE 8080
 
-# Start with wrapper script
-CMD ["./start.sh"]
+# Use ENTRYPOINT with explicit shell for PORT variable
+ENTRYPOINT ["/bin/sh", "-c", "exec gunicorn app:app --bind 0.0.0.0:${PORT:-8080}"]
