@@ -34,5 +34,8 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
+# Use Railway's PORT environment variable
+ENV PORT=8080
+
 # Start with gunicorn
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8080"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:$PORT"]
